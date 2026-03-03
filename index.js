@@ -147,7 +147,9 @@ function processCommand(command) {
                     return b.date.localeCompare(a.date); 
                 });
             }
-            console.log(formatTable(sorted));
+            else {
+                console.log("Неправильная команда");
+            }
             break;
             
         case 'date':
