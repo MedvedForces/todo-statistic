@@ -35,6 +35,9 @@ function getComment() {
 
 function processCommand(command) {
     const arrayComment = getComment();
+    const parts = command.split(' ');
+    const cmd = parts[0];
+    const username = parts[1];
     switch (command) {
         case 'exit':
             process.exit(0);
@@ -53,6 +56,8 @@ function processCommand(command) {
             }
 
             break;
+        case 'user':
+
         default:
             console.log('wrong command');
             break;
