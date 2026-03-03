@@ -34,14 +34,22 @@ function getComment() {
 }
 
 function processCommand(command) {
+    const arrayComment = getComment();
     switch (command) {
         case 'exit':
             process.exit(0);
             break;
         case 'show':
-            const arrayComment = getComment();
             for (const com of arrayComment) {
                 console.log(com.text);
+            }
+
+            break;
+        case 'important':
+            for (const el of arrayComment){
+                if (el.text.includes('!')){
+                    console.log(el.text);
+                }
             }
 
             break;
