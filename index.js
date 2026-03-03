@@ -22,7 +22,7 @@ function getComment() {
             const todoIndex = line.indexOf('TODO', commentStart);
             
             if (commentStart !== -1 && todoIndex !== -1 && todoIndex >= commentStart) {
-                const rawText = line.substring(commentStart).trim(); // Сырая строка: "// TODO ..."
+                const rawText = line.substring(commentStart).trim();
                 
                 const contentStr = line.substring(todoIndex + 4).trim();
                 
@@ -75,9 +75,22 @@ function processCommand(command) {
             break;
             
         case 'user':
-            const targetUser = arg.toLowerCase();
-            arrayComment.filter(com => com.user.toLowerCase() === targetUser)
-                        .forEach(com => console.log(com.raw));
+            const trueUser = arg.toLowerCase();
+            const userComments = [];
+
+            for (const com of arrayComment) {
+                if (com.user.toLowerCase() === trueUser) {
+                    userComments.push(com);
+                }
+            }
+            
+            if (userComments.length > 0) {
+                for (const com of userComments) {
+                    console.log(com.raw);
+                }
+            } else {
+                console.log(`Нет комментариев от пользователя ${arg}`);
+            }
             break;
             
         case 'sort':
@@ -88,9 +101,12 @@ function processCommand(command) {
             } 
             else if (arg === 'user') {
                 sorted.sort((a, b) => {
-                    if (a.user && !b.user) return -1;
-                    if (!a.user && b.user) return 1;
-                    if (!a.user && !b.user) return 0;
+                    if (a.user && !b.user) 
+                        return -1;
+                    if (!a.user && b.user) 
+                        return 1;
+                    if (!a.user && !b.user) 
+                        return 0;
                     return a.user.localeCompare(b.user); 
                 });
             } 
