@@ -37,7 +37,12 @@ function getComment() {
                     text = parts.slice(2).join(';').trim(); 
                 }
                 
-                const importance = (rawText.match(/!/g) || []).length;
+                let importance = 0;
+                for (let i = 0; i < rawText.length; i++) {
+                    if (rawText[i] === '!') {
+                        importance++;
+                    }
+                }
                 
                 todoComments.push({
                     line: index + 1,
@@ -66,7 +71,8 @@ function formatTable(comments) {
         const importance = com.importance > 0 ? '!' : ' ';
         
         const formatCell = (value, maxWidth) => {
-            if (!value) value = '';
+            if (!value) 
+                value = '';
             const strValue = String(value);
             if (strValue.length <= maxWidth) {
                 return strValue.padEnd(maxWidth);
@@ -127,6 +133,7 @@ function processCommand(command) {
             
             if (arg === 'importance') {
                 sorted.sort((a, b) => b.importance - a.importance);
+                console.log(formatTable(sorted));
             } 
             else if (arg === 'user') {
                 sorted.sort((a, b) => {
@@ -138,14 +145,19 @@ function processCommand(command) {
                         return 0;
                     return a.user.localeCompare(b.user); 
                 });
+                console.log(formatTable(sorted));
             } 
             else if (arg === 'date') {
                 sorted.sort((a, b) => {
-                    if (a.date && !b.date) return -1;
-                    if (!a.date && b.date) return 1;
-                    if (!a.date && !b.date) return 0;
+                    if (a.date && !b.date) 
+                        return -1;
+                    if (!a.date && b.date) 
+                        return 1;
+                    if (!a.date && !b.date) 
+                        return 0;
                     return b.date.localeCompare(a.date); 
                 });
+                console.log(formatTable(sorted));
             }
             else {
                 console.log("Неправильная команда");
