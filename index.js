@@ -19,12 +19,33 @@ function getComment() {
         
         lines.forEach((line, index) => {
             const commentStart = line.indexOf('//');
+            const todoIndex = line.indexOf('TODO', commentStart);
             
-            if (commentStart !== -1 && line.includes('TODO')) {
-                const commentText = line.substring(commentStart).trim();
+            if (commentStart !== -1 && todoIndex !== -1 && todoIndex >= commentStart) {
+                const rawText = line.substring(commentStart).trim(); // Сырая строка: "// TODO ..."
+                
+                const contentStr = line.substring(todoIndex + 4).trim();
+                
+                let user = '';
+                let date = '';
+                let text = contentStr;
+                
+                const parts = contentStr.split(';');
+                if (parts.length >= 3) {
+                    user = parts[0].trim();
+                    date = parts[1].trim();
+                    text = parts.slice(2).join(';').trim(); 
+                }
+                
+                const importance = (rawText.match(/!/g) || []).length;
+                
                 todoComments.push({
                     line: index + 1,
-                    text: commentText
+                    raw: rawText,    
+                    user: user,     
+                    date: date,     
+                    text: text,      
+                    importance: importance 
                 });
             }
         });
@@ -35,35 +56,62 @@ function getComment() {
 
 function processCommand(command) {
     const arrayComment = getComment();
-    const parts = command.split(' ');
-    const cmd = parts[0];
-    const username = parts[1];
-    switch (command) {
+    const parts = command.trim().split(' ');
+    const cmd = parts[0]; 
+    const arg = parts.slice(1).join(' ');
+
+    switch (cmd) {
         case 'exit':
             process.exit(0);
             break;
+            
         case 'show':
-            for (const com of arrayComment) {
-                console.log(com.text);
-            }
-
+            arrayComment.forEach(com => console.log(com.raw));
             break;
+            
         case 'important':
-            for (const el of arrayComment){
-                if (el.text.includes('!')){
-                    console.log(el.text);
-                }
-            }
-
+            arrayComment.filter(com => com.importance > 0)
+                        .forEach(com => console.log(com.raw));
             break;
+            
         case 'user':
+            const targetUser = arg.toLowerCase();
+            arrayComment.filter(com => com.user.toLowerCase() === targetUser)
+                        .forEach(com => console.log(com.raw));
+            break;
+            
+        case 'sort':
+            let sorted = [...arrayComment]; 
+            
+            if (arg === 'importance') {
+                sorted.sort((a, b) => b.importance - a.importance);
+            } 
+            else if (arg === 'user') {
+                sorted.sort((a, b) => {
+                    if (a.user && !b.user) return -1;
+                    if (!a.user && b.user) return 1;
+                    if (!a.user && !b.user) return 0;
+                    return a.user.localeCompare(b.user); 
+                });
+            } 
+            else if (arg === 'date') {
+                sorted.sort((a, b) => {
+                    if (a.date && !b.date) return -1;
+                    if (!a.date && b.date) return 1;
+                    if (!a.date && !b.date) return 0;
+                    return b.date.localeCompare(a.date); 
+                });
+            }
+            sorted.forEach(com => console.log(com.raw));
+            break;
+            
+        case 'date':
+            arrayComment.filter(com => com.date && com.date >= arg)
+                        .forEach(com => console.log(com.raw));
+            break;
 
         default:
             console.log('wrong command');
             break;
     }
 }
-
-// TODO you can do it!
-
-
