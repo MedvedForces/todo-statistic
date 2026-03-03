@@ -54,6 +54,37 @@ function getComment() {
     return todoComments;
 }
 
+function formatTable(comments) {
+    const colWidths = {
+        importance: 1,
+        user: 10,
+        date: 10,
+        text: 50
+    };
+    
+    const rows = comments.map(com => {
+        const importance = com.importance > 0 ? '!' : ' ';
+        
+        const formatCell = (value, maxWidth) => {
+            if (!value) value = '';
+            const strValue = String(value);
+            if (strValue.length <= maxWidth) {
+                return strValue.padEnd(maxWidth);
+            } else {
+                return strValue.substring(0, maxWidth - 3) + '...';
+            }
+        };
+        
+        const formattedUser = formatCell(com.user, colWidths.user);
+        const formattedDate = formatCell(com.date, colWidths.date);
+        const formattedText = formatCell(com.text, colWidths.text);
+        
+        return `  ${importance}  |  ${formattedUser}  |  ${formattedDate}  |  ${formattedText}`;
+    });
+    
+    return rows.join('\n');
+}
+
 function processCommand(command) {
     const arrayComment = getComment();
     const parts = command.trim().split(' ');
@@ -66,12 +97,12 @@ function processCommand(command) {
             break;
             
         case 'show':
-            arrayComment.forEach(com => console.log(com.raw));
+            console.log(formatTable(arrayComment));
             break;
             
         case 'important':
-            arrayComment.filter(com => com.importance > 0)
-                        .forEach(com => console.log(com.raw));
+            const importantComments = arrayComment.filter(com => com.importance > 0);
+            console.log(formatTable(importantComments));
             break;
             
         case 'user':
@@ -85,9 +116,7 @@ function processCommand(command) {
             }
             
             if (userComments.length > 0) {
-                for (const com of userComments) {
-                    console.log(com.raw);
-                }
+                console.log(formatTable(userComments));
             } else {
                 console.log(`Нет комментариев от пользователя ${arg}`);
             }
@@ -118,12 +147,12 @@ function processCommand(command) {
                     return b.date.localeCompare(a.date); 
                 });
             }
-            sorted.forEach(com => console.log(com.raw));
+            console.log(formatTable(sorted));
             break;
             
         case 'date':
-            arrayComment.filter(com => com.date && com.date >= arg)
-                        .forEach(com => console.log(com.raw));
+            const dateComments = arrayComment.filter(com => com.date && com.date >= arg);
+            console.log(formatTable(dateComments));
             break;
 
         default:
